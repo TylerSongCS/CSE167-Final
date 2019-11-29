@@ -1,8 +1,9 @@
 #include "Window.h"
 #include <list>
 #include <cmath>
-
-
+#include "model.h"
+#include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 using namespace std;
 
 
@@ -102,8 +103,6 @@ double deltaTime = 0;
 glm::mat4 Window::projection; // Projection matrix.
 double fov = 60.0;
 
-Geometry* car2;
-
 glm::vec3 Window::eye(0, 5, 10); // Camera position.
 glm::vec3 Window::center(0, 0, 0); // The point we are looking at.
 glm::vec3 Window::up(0, 1, 0); // The up direction of the camera.
@@ -124,6 +123,10 @@ GLuint Window::projectionLoc; // Location of projection in shader.
 GLuint Window::lightLoc; // Location of light in shader.
 GLuint Window::eyeLoc; // Location of cameraPos in shader.
 GLuint Window::lightColorLoc; // location of the lightColor in shader
+
+Shader* ourShader;
+
+Model* ourModel;
 
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
@@ -180,7 +183,9 @@ bool Window::initializeProgram() {
 
 bool Window::initializeObjects()
 {
-    car2 = new Geometry("resources/models/Dodge_Charger_High.obj", cubemapShader);
+    ourShader = new Shader("1.model_loading.vs", "1.model_loading.fs");
+    
+    ourModel = new Model("nanosuit/nanosuit.obj");
     
     frust = new Frustum(fov,double(width) / (double)height, 1.0, 100.0);
     
@@ -191,8 +196,6 @@ bool Window::initializeObjects()
     car = new Geometry(sphereFileName, cubemapShader);
     
     world->addNode(carTransform);
-    
-    world->addNode(car2);
     
     carTransform->addNode(car);
     
@@ -270,6 +273,22 @@ bool Window::initializeObjects()
     carTransform->translate(lastLocation);
     
     carTransform->scale(carTransformFactor);
+
+    
+    /*for(int i = 0; i < 24; i++){
+        Transform * temp = new Transform(mat4(1.0f));
+        ctrlPointTransforms.push_back(temp);
+        world->addNode(temp);
+    }
+    for(int i = 0; i < 24; i++){
+        Geometry * temp = new Geometry(sphereFileName, program);
+        ctrlPointGeometry.push_back(temp);
+        ctrlPointTransforms[i]->addNode(temp);
+    }
+    for(int i = 0; i < 24; i++){
+        ctrlPointTransforms[i]->translate(allControlPoints[i]);
+        //ctrlPointTransforms[i]->scale(vec3(0.1f,0.1f,0.1f));
+    }*/
     
     
 	return true;
@@ -426,7 +445,20 @@ void Window::displayCallback(GLFWwindow* window)
         }
         lastPoint = currPoint;
     }
-    
+    // don't forget to enable shader before setting uniforms
+    ourShader->use();
+
+    // view/projection transformations
+    ourShader->setMat4("projection", projection);
+    ourShader->setMat4("view", view);
+
+    // render the loaded model
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));    // it's a bit too big for our scene, so scale it down
+    ourShader->setMat4("model", model);
+    ourModel->Draw(*ourShader);
+
 	// Swap buffers.
 	glfwSwapBuffers(window);
 }

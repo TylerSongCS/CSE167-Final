@@ -26,6 +26,8 @@
 #include "BezierCurve.hpp"
 #include "ControlPoint.hpp"
 #include "HandleBar.hpp"
+#include "shader2.h"
+
 
 class Window
 {
