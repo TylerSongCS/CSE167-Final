@@ -4,8 +4,15 @@
 #include "model.h"
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
+#include <irrKlang.h>
+using namespace irrklang;
 using namespace std;
+ISoundEngine *SoundEngine;
+float alpha = 0.0f;
+int animationIndex = 0;
+vector<bool> animationBools(100);
 
+vec3 gradientColor1 = vec3(0,0,0);
 
 Window::Material Window::material;
 float Window::ambientStrength;
@@ -57,53 +64,52 @@ string sphereFileName = "sphere.obj";
 
 //Bezier Curves
 BezierCurve* curve;
-
-HandleBar* handles;
+BezierCurve* curve2;
+BezierCurve* curve3;
+BezierCurve* curve4;
 
 //initial control point values
-vec3 temp1;
-vec3 temp2 = vec3(4,0,-4);
-vec3 temp3 = vec3(6,5,-6);
-vec3 temp4;
-vec3 temp5 = vec3(-3,0,-3);
-vec3 temp6 = vec3(-4,0,-4);
-vec3 temp7;
-vec3 temp8 = vec3(-7,0,0);
-vec3 temp9 = vec3(-8,4,-4);
-vec3 temp10;
-vec3 temp11 = vec3(-3,5,0);
-vec3 temp12 = vec3(-10,0,-4);
-vec3 temp13;
-vec3 temp14 = vec3(-10,5,0);
-vec3 temp15= vec3(-13,0,-4);
-vec3 temp16;
-vec3 temp17 = vec3(-6,-5,0);
-vec3 temp18 = vec3(-8,0,0);
-vec3 temp19;
-vec3 temp20 = vec3(-4,-5,0);
-vec3 temp21 = vec3(-3,0,0);
-vec3 temp22;
-vec3 temp23 = vec3(1,-5,0);
-vec3 temp24= vec3(3,0,0);
+vec3 temp1 = vec3(0,0,10);
+vec3 temp2 = vec3(0,-5,6.7);
+vec3 temp3 = vec3(0,5,3.3);
+vec3 temp4 = vec3(0,1,1);
 
-int currentControlPoint = 0;
+vec3 temp5 = vec3(-2,0.5,1);
+vec3 temp6 = vec3(-2,0.5,0.33);
+vec3 temp7 = vec3(-2,0.5,-0.33);
+vec3 temp8 = vec3(-2,0.5,-1);
+
+vec3 temp9 = vec3(-1,0.5,-2.5);
+vec3 temp10 = vec3(-0.33,0.5,-2.5);
+vec3 temp11 = vec3(0.33,0.5,-2.5);
+vec3 temp12 = vec3(1,0.5,-2.5);
+
+vec3 temp13 = vec3(2,0.5,-1);
+vec3 temp14 = vec3(2,0.5,-0.33);
+vec3 temp15 = vec3(2,0.5,0.33);
+vec3 temp16 = vec3(2,0.5,1);
+
 vector<vec3> allControlPoints;
 
 vector<vec3> curveVertices;
+vector<vec3> curveVertices2;
+vector<vec3> curveVertices3;
+vector<vec3> curveVertices4;
+
 vec3 lastLocation;
 int curveIndex = 0;
-bool paused = false;
 
 vector<ControlPoint * > ctrlPointObjects;
 
 double lastTime = -1;
 double currentTime;
 double deltaTime = 0;
+double totalElapsedTime = 0;
 
 glm::mat4 Window::projection; // Projection matrix.
 double fov = 60.0;
 
-glm::vec3 Window::eye(0, 5, 10); // Camera position.
+glm::vec3 Window::eye(5, 5, 5); // Camera position.
 glm::vec3 Window::center(0, 0, 0); // The point we are looking at.
 glm::vec3 Window::up(0, 1, 0); // The up direction of the camera.
 
@@ -127,6 +133,7 @@ GLuint Window::lightColorLoc; // location of the lightColor in shader
 Shader* ourShader;
 
 Model* ourModel;
+
 
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
@@ -183,21 +190,20 @@ bool Window::initializeProgram() {
 
 bool Window::initializeObjects()
 {
-    ourShader = new Shader("1.model_loading.vs", "1.model_loading.fs");
+    lastLocation = eye;
     
-    ourModel = new Model("nanosuit/nanosuit.obj");
+    animationBools[0] = true;
+    
+    SoundEngine = createIrrKlangDevice();
+    
+    ourShader = new Shader("shaders/1.model_loading.vs", "shaders/1.model_loading.fs");
+    //"Lamborginhi Aventador OBJ/Lamborghini_Aventador.obj"
+    //"nanosuit/nanosuit.obj"
+    ourModel = new Model("Gta-spano-2010_obj/Gta-spano-2010.obj");
     
     frust = new Frustum(fov,double(width) / (double)height, 1.0, 100.0);
     
     world = new Transform(mat4(1.0f));
-    
-    carTransform = new Transform(mat4(1.0f));
-    
-    car = new Geometry(sphereFileName, cubemapShader);
-    
-    world->addNode(carTransform);
-    
-    carTransform->addNode(car);
     
     skybox = new Skybox(skyboxShader);
     
@@ -205,90 +211,39 @@ bool Window::initializeObjects()
     
     skybox->setCubemap(cubemapTexture);
     
-    car -> cubemapTexture = cubemapTexture;
-    
     world->addNode(skybox);
     
+    allControlPoints.clear();
     allControlPoints.push_back(temp1);
     allControlPoints.push_back(temp2);
     allControlPoints.push_back(temp3);
     allControlPoints.push_back(temp4);
+    
+    handleBezierCurves(curve, &curveVertices);
+    
+    allControlPoints.clear();
     allControlPoints.push_back(temp5);
     allControlPoints.push_back(temp6);
     allControlPoints.push_back(temp7);
     allControlPoints.push_back(temp8);
+    
+    handleBezierCurves(curve2, &curveVertices2);
+    
+    allControlPoints.clear();
     allControlPoints.push_back(temp9);
     allControlPoints.push_back(temp10);
     allControlPoints.push_back(temp11);
     allControlPoints.push_back(temp12);
+    
+    handleBezierCurves(curve3, &curveVertices3);
+    
+    allControlPoints.clear();
     allControlPoints.push_back(temp13);
     allControlPoints.push_back(temp14);
     allControlPoints.push_back(temp15);
     allControlPoints.push_back(temp16);
-    allControlPoints.push_back(temp17);
-    allControlPoints.push_back(temp18);
-    allControlPoints.push_back(temp19);
-    allControlPoints.push_back(temp20);
-    allControlPoints.push_back(temp21);
-    allControlPoints.push_back(temp22);
-    allControlPoints.push_back(temp23);
-    allControlPoints.push_back(temp24);
     
-    curve = new BezierCurve(bezierCurveShader, allControlPoints);
-    
-    world->addNode(curve);
-    
-    allControlPoints = curve->getAllpoints();
-    
-    for(int i = 0; i< 24; i++){
-        ctrlPointObjects.push_back(NULL);
-    }
-    
-    vector<vec3> tempVec1 = curve->getAllpoints();
-    vector<int> tempVec2 = curve->getAnchorpoints();
-    
-    for(int i = 0; i < tempVec2.size(); i++){
-        ControlPoint* ctrlPoint = new ControlPoint(tempVec1[tempVec2[i]], bezierCurveShader, true);
-        ctrlPointObjects[tempVec2[i]] = ctrlPoint;
-        world->addNode(ctrlPoint);
-    }
-    tempVec2 = curve->getCtrlpoints();
-    for(int i = 0; i < tempVec2.size(); i++){
-        ControlPoint* ctrlPoint = new ControlPoint(tempVec1[tempVec2[i]], bezierCurveShader, false);
-        ctrlPointObjects[tempVec2[i]] = ctrlPoint;
-        world->addNode(ctrlPoint);
-    }
-    
-    tempVec1 = curve->getHandlepoints();
-    handles = new HandleBar(tempVec1, bezierHandleShader);
-    world->addNode(handles);
-    
-    curveVertices = curve->getCurveVertices();
-    
-    currentControlPoint = 0;
-    
-    ctrlPointObjects[currentControlPoint]->setColor(vec3(0,0,1));
-    
-    lastLocation = curveVertices[curveIndex];
-    carTransform->translate(lastLocation);
-    
-    carTransform->scale(carTransformFactor);
-
-    
-    /*for(int i = 0; i < 24; i++){
-        Transform * temp = new Transform(mat4(1.0f));
-        ctrlPointTransforms.push_back(temp);
-        world->addNode(temp);
-    }
-    for(int i = 0; i < 24; i++){
-        Geometry * temp = new Geometry(sphereFileName, program);
-        ctrlPointGeometry.push_back(temp);
-        ctrlPointTransforms[i]->addNode(temp);
-    }
-    for(int i = 0; i < 24; i++){
-        ctrlPointTransforms[i]->translate(allControlPoints[i]);
-        //ctrlPointTransforms[i]->scale(vec3(0.1f,0.1f,0.1f));
-    }*/
+    handleBezierCurves(curve4, &curveVertices4);
     
     
 	return true;
@@ -398,29 +353,68 @@ void Window::displayCallback(GLFWwindow* window)
     
     frust->CalculateFrustum(view, projection);
     
+
 	// Specify the values of the uniform variables we are going to use.
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3fv(lightLoc, 1, glm::value_ptr(light_pos));
     glUniform3fv(eyeLoc, 1, glm::value_ptr(eye));
     glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
 
-    if(lastTime == -1){
-        lastTime = 0;
-    }
+
+
     currentTime = glfwGetTime();
-    deltaTime = currentTime - lastTime;
-    
-    if ( deltaTime >= 0.005 && !paused) {
-        carTransform->scale((1.0f / carTransformFactor));
-        carTransform->translate( -1.0f * (lastLocation));
-        curveIndex ++;
-        curveIndex = curveIndex % curveVertices.size();
-        lastLocation = curveVertices[curveIndex];
-        carTransform->translate(lastLocation);
-        carTransform->scale(carTransformFactor);
+    if(lastTime == -1){
         lastTime = currentTime;
     }
+    deltaTime = currentTime - lastTime;
     
+    if(animationBools[0]){
+        animationBools[0] = soundSubroutine("immortal.wav", false);
+        animationBools[1] = !animationBools[0];
+    }else if(animationBools[1]){
+        animationBools[1] = waitSubroutine(2.7);
+        animationBools[2] = !animationBools[1];
+    }else if(animationBools[2]){
+        animationBools[2] = fadeSubroutine(2.4, vec3(0,0,0));
+        animationBools[3] = !animationBools[2];
+    }else if(animationBools[3]){
+        eye = vec3(-5,5,5);
+        view = glm::lookAt(Window::eye, Window::center, Window::up);
+        animationBools[3] = waitSubroutine(2.7);
+        animationBools[4] = !animationBools[3];
+    }else if(animationBools[4]){
+        animationBools[4] = fadeSubroutine(2.3, vec3(0,0,0));
+        animationBools[5] = !animationBools[4];
+    }else if(animationBools[5]){
+        eye = vec3(0,5,-5);
+        view = glm::lookAt(Window::eye, Window::center, Window::up);
+        animationBools[5] = waitSubroutine(3.0);
+        animationBools[6] = !animationBools[5];
+    }else if(animationBools[6]){
+        animationBools[6] = fadeSubroutine(2.8, vec3(0,0,0));
+        animationBools[7] = !animationBools[6];
+    }else if(animationBools[7]){
+        animationBools[7] = cameraSubroutine(3.0, curveVertices);
+        animationBools[8] = !animationBools[7];
+    }else if(animationBools[8]){
+        animationBools[8] = fadeSubroutine(2.8, vec3(0,0,0));
+        animationBools[9] = !animationBools[8];
+    }else if(animationBools[9]){
+        animationBools[9] = cameraSubroutine(3.0, curveVertices2);
+        animationBools[10] = !animationBools[9];
+    }else if(animationBools[10]){
+        animationBools[10] = fadeSubroutine(2.8, vec3(0,0,0));
+        animationBools[11] = !animationBools[10];
+    }else if(animationBools[11]){
+        animationBools[11] = cameraSubroutine(3.0, curveVertices3);
+        animationBools[12] = !animationBools[11];
+    }else if(animationBools[12]){
+        animationBools[12] = fadeSubroutine(2.8, vec3(0,0,0));
+        animationBools[13] = !animationBools[12];
+    }else if(animationBools[13]){
+        animationBools[13] = cameraSubroutine(3.0, curveVertices4);
+        animationBools[14] = !animationBools[13];
+    }
 	// Render the object.
     world->draw(mat4(1.0f));
     
@@ -445,6 +439,7 @@ void Window::displayCallback(GLFWwindow* window)
         }
         lastPoint = currPoint;
     }
+    
     // don't forget to enable shader before setting uniforms
     ourShader->use();
 
@@ -454,12 +449,19 @@ void Window::displayCallback(GLFWwindow* window)
 
     // render the loaded model
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));    // it's a bit too big for our scene, so scale it down
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));    // it's a bit too big for our scene, so scale it down
     ourShader->setMat4("model", model);
+    ourShader->setFloat("shininess", 1.0f);
+    ourShader->setVec3("lightColor", vec3(1.0f,1.0f,1.0f));
+    ourShader->setVec3("light_position_world", light_pos);
+    ourShader->setFloat("shininess", 64.0f);
+    ourShader->setVec3("viewPos", eye);
+    ourShader->setFloat("alpha", 1.0f);
     ourModel->Draw(*ourShader);
-
-	// Swap buffers.
+    
+    mygl_GradientBackground( gradientColor1.x,gradientColor1.y , gradientColor1.z, alpha, gradientColor1.x, gradientColor1.y, gradientColor1.z, alpha );
+    
 	glfwSwapBuffers(window);
 }
 
@@ -565,16 +567,6 @@ void Window::setMaterial (int option, Geometry* obj){
     }
     obj->setMaterial(material.ambient, ambientStrength, material.diffuse, diffuseStrength, material.specular, specularStrength, material.shininess);
 }
-int Window::checkCurrentCtrl(int index){
-    if(index % 3 == 0){                 //found anchor
-        return 0;
-    }else if((index - 1) % 3 == 0 ){    //found right handle
-        return 1;
-    }else{                              //found left handle
-        return 2;
-    }
-    
-}
 
 void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -591,71 +583,32 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
                 // Close the window. This causes the program to also terminate.
                 glfwSetWindowShouldClose(window, GL_TRUE);
                 break;
-            case GLFW_KEY_LEFT:{
-                int temp = checkCurrentCtrl(currentControlPoint);
-                if(temp != 0){
-                    ctrlPointObjects[currentControlPoint]->setColor(vec3(0,1,0));
-                }else{
-                    ctrlPointObjects[currentControlPoint]->setColor(vec3(1,0,0));
-                }
-                if(currentControlPoint == 0){
-                    currentControlPoint = 23;
-                }else{
-                    currentControlPoint--;
-                }
-                ctrlPointObjects[currentControlPoint]->setColor(vec3(0,0,1));
+            case GLFW_KEY_C:{
+                SoundEngine->play2D("dixie-horn.wav", GL_FALSE);
                 break;
             }
-            case GLFW_KEY_RIGHT:{
-                int temp = checkCurrentCtrl(currentControlPoint);
-                if(temp != 0){
-                    ctrlPointObjects[currentControlPoint]->setColor(vec3(0,1,0));
-                }else{
-                    ctrlPointObjects[currentControlPoint]->setColor(vec3(1,0,0));
-                }
-
-                currentControlPoint++;
-                currentControlPoint = currentControlPoint % 24;
-            
-                ctrlPointObjects[currentControlPoint]->setColor(vec3(0,0,1));
+            case GLFW_KEY_W:{
+                view = glm::translate(view, vec3(0,0,1));
                 break;
             }
-            case GLFW_KEY_X:{
-                if(mods == GLFW_MOD_SHIFT){
-                    cerr<<"shift x" << endl;
-                    handleManipulate(vec3(-1,0,0));
-                }else{
-                    cerr<<"reg x" << endl;
-                    handleManipulate(vec3(1,0,0));
-                }
-                
+            case GLFW_KEY_S:{
+                view = glm::translate(view, vec3(0,0,-1));
                 break;
             }
-            case GLFW_KEY_Y:{
-                if(mods == GLFW_MOD_SHIFT){
-                    cerr<<"shift y" << endl;
-                    handleManipulate(vec3(0,-1,0));
-                }else{
-                    cerr<<"reg y" << endl;
-                    handleManipulate(vec3(0,1,0));
-                }
-                
+            case GLFW_KEY_A:{
+                view = glm::translate(view, vec3(-1,0,0));
+                break;
+            }
+            case GLFW_KEY_D:{
+                view = glm::translate(view, vec3(1,0,0));
                 break;
             }
             case GLFW_KEY_Z:{
-                if(mods == GLFW_MOD_SHIFT){
-                    cerr<<"shift z" << endl;
-                    handleManipulate(vec3(0,0,-1));
-                }else{
-                    cerr<<"reg z" << endl;
-                    handleManipulate(vec3(0,0,1));
-                }
-                
+                view = glm::translate(view, vec3(0,1,0));
                 break;
             }
-            case GLFW_KEY_P:{
-                paused = !paused;
-                
+            case GLFW_KEY_X:{
+                view = glm::translate(view, vec3(0,-1,0));
                 break;
             }
             default:
@@ -664,67 +617,159 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
-void Window::handleManipulate(vec3 translateAmount){
-    int temp = checkCurrentCtrl(currentControlPoint);
-    int right;
-    int left;
-
-    if( temp == 0){
-         right = currentControlPoint + 1;
-        if(currentControlPoint == 0){
-            left = 23;
-        }else{
-            left = currentControlPoint - 1;
-        }
-        allControlPoints[left] += translateAmount;
-        allControlPoints[right] += translateAmount;
-    }else if(temp == 1){
-        allControlPoints[currentControlPoint] += translateAmount;
-        if(currentControlPoint == 1){
-            left = 23;
-        }else{
-            left = currentControlPoint - 2;
-        }
-        allControlPoints[left] -= translateAmount;
+bool Window::fadeSubroutine(double amountTime, vec3 color){
+    gradientColor1 = color;
+    double velocity;
+    if(amountTime > 5){
+        velocity = 0.04;
     }else{
-        allControlPoints[currentControlPoint] += translateAmount;
-        if(currentControlPoint == 23){
-            right = 1;
-        }else{
-            right = currentControlPoint + 2;
+        velocity = (0.75 * amountTime)/ 100;
+    }
+    if(deltaTime >= velocity){
+        if(alpha < 1.0){
+            alpha += 0.01;
         }
-        allControlPoints[right] -= translateAmount;
+        lastTime = currentTime;
+        totalElapsedTime += deltaTime;
     }
+    if(totalElapsedTime >= amountTime){
+        alpha = 0.0f;
+        totalElapsedTime = 0;
+        //continue complete
+        return false;
+    }
+    //animation continue
+    return true;
+}
+bool Window::waitSubroutine(double amountTime){
+    if(deltaTime >= amountTime){
+        lastTime = currentTime;
+        //wait complete
+        return false;
+    }
+    //continue waiting
+    return true;
+}
+bool Window::soundSubroutine(string filename, bool repeat){
+    if(repeat){
+        SoundEngine->play2D(filename.c_str(), GL_TRUE);
+    }else{
+        SoundEngine->play2D(filename.c_str(), GL_FALSE);
+    }
+    lastTime = currentTime;
+    return false;
+}
+bool Window::cameraSubroutine(double amountTime, vector<vec3> vertices){
+    double velocity = amountTime / vertices.size();
+    if(deltaTime >= velocity){
+        lastLocation = vertices[curveIndex];
+        eye = lastLocation;
+        curveIndex ++;
+        curveIndex = curveIndex % vertices.size();
+        view = glm::lookAt(Window::eye, Window::center, Window::up);
+        lastTime = currentTime;
+        totalElapsedTime += deltaTime;
+    }
+    if(totalElapsedTime >= amountTime){
+        totalElapsedTime = 0;
+        curveIndex = 0;
+        return false;
+    }
+    return true;
+    
+}
+void Window::handleBezierCurves(BezierCurve* curve, vector<vec3>* vertices){
+    curve = new BezierCurve(bezierCurveShader, allControlPoints);
+    
+    world->addNode(curve);
+    
+    ctrlPointObjects.clear();
+    for(int i = 0; i< allControlPoints.size(); i++){
+        ctrlPointObjects.push_back(NULL);
+    }
+    
+    vector<vec3> tempVec1 = curve->getAllpoints();
+    vector<int> tempVec2 = curve->getAnchorpoints();
+    
+    for(int i = 0; i < tempVec2.size(); i++){
+        ControlPoint* ctrlPoint = new ControlPoint(tempVec1[tempVec2[i]], bezierCurveShader, true);
+        ctrlPointObjects[tempVec2[i]] = ctrlPoint;
+        world->addNode(ctrlPoint);
+    }
+    
+    tempVec2 = curve->getCtrlpoints();
+    for(int i = 0; i < tempVec2.size(); i++){
+        ControlPoint* ctrlPoint = new ControlPoint(tempVec1[tempVec2[i]], bezierCurveShader, false);
+        ctrlPointObjects[tempVec2[i]] = ctrlPoint;
+        world->addNode(ctrlPoint);
+    }
+    
+    *vertices = curve->getCurveVertices();
+}
+#define SHADER_HEADER "#version 330 core\n"
+#define SHADER_STR(x) #x
+void Window::mygl_GradientBackground( float top_r, float top_g, float top_b, float top_a,
+                              float bot_r, float bot_g, float bot_b, float bot_a )
+{
+  glDisable(GL_DEPTH_TEST);
 
+  static GLuint background_vao = 0;
+  static GLuint background_shader = 0;
+  
+  if (background_vao == 0)
+  {
+    glGenVertexArrays(1, &background_vao);
+  
+    const char* vs_src = (const char*) SHADER_HEADER SHADER_STR
+    (
+      out vec2 v_uv;
+      void main()
+      {
+        uint idx = uint(gl_VertexID);
+        gl_Position = vec4( idx & 1U, idx >> 1U, 0.0, 0.5 ) * 4.0 - 1.0;
+        v_uv = vec2( gl_Position.xy * 0.5 + 0.5 );
+      }
+    );
 
-    curve->updateControlPoints(allControlPoints);
-    
-    allControlPoints = curve->getAllpoints();
-    
-    vector<int> anchors = curve->getAnchorpoints();
-    
-    for(int i = 0; i < anchors.size(); i++){
-        int index = anchors[i];
-        ctrlPointObjects[index]->setPoint(allControlPoints[index]);
-    }
-    
-    vector<int> controls = curve->getCtrlpoints();
-    
-    for(int i = 0; i < controls.size(); i++){
-        int index = controls[i];
-        ctrlPointObjects[index]->setPoint(allControlPoints[index]);
-    }
-    
-    vector<vec3> handlePoints = curve->getHandlepoints();
-    handles->setPoints(handlePoints);
-    
-    curveVertices = curve->getCurveVertices();
-    
-    //reset car on the curve
-    carTransform->scale((1.0f / carTransformFactor));
-    carTransform->translate(-1.0f * lastLocation);
-    carTransform->translate(curveVertices[curveIndex]);
-    carTransform->scale(carTransformFactor);
-    lastLocation = curveVertices[curveIndex];
-    
+    const char* fs_src = (const char*) SHADER_HEADER SHADER_STR
+    (
+      uniform vec4 top_color;
+      uniform vec4 bot_color;
+      in vec2 v_uv;
+      out vec4 frag_color;
+
+      void main()
+      {
+        frag_color = bot_color * (1 - v_uv.y) + top_color * v_uv.y;
+      }
+    );
+    GLuint vs_id, fs_id;
+    vs_id = glCreateShader( GL_VERTEX_SHADER );
+    fs_id = glCreateShader( GL_FRAGMENT_SHADER );
+    glShaderSource(vs_id, 1, &vs_src, NULL);
+    glShaderSource(fs_id, 1, &fs_src, NULL);
+    glCompileShader(vs_id);
+    glCompileShader(fs_id);
+    background_shader = glCreateProgram();
+    glAttachShader( background_shader, vs_id );
+    glAttachShader( background_shader, fs_id );
+    glLinkProgram(  background_shader );
+    glDetachShader( background_shader, fs_id );
+    glDetachShader( background_shader, vs_id );
+    glDeleteShader( fs_id );
+    glDeleteShader( vs_id );
+    glUseProgram( background_shader );
+  }
+
+  glUseProgram( background_shader );
+  GLuint top_color_loc = glGetUniformLocation( background_shader, "top_color" );
+  GLuint bot_color_loc = glGetUniformLocation( background_shader, "bot_color" );
+  glUniform4f( top_color_loc, top_r, top_g, top_b, alpha );
+  glUniform4f( bot_color_loc, bot_r, bot_g, bot_b, alpha );
+  
+  glBindVertexArray( background_vao );
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glBindVertexArray(0);
+
+  glEnable(GL_DEPTH_TEST);
 }

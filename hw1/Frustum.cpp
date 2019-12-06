@@ -246,5 +246,7 @@ bool Frustum::SphereInFrustum(vec3 &pos, float &radius)
     return res;
     //return true;
 }
-
+vec4* Frustum::getFustumPlanes(){
+    return frustum_planes;
+}
 

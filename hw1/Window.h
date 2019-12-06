@@ -28,7 +28,6 @@
 #include "HandleBar.hpp"
 #include "shader2.h"
 
-
 class Window
 {
 public:
@@ -77,6 +76,13 @@ public:
     static void interpolate(glm::vec3 fromPos, glm::vec3 toPos, float weight);
     static int checkCurrentCtrl(int index);
     static void handleManipulate(glm::vec3 translateAmount);
+    static void mygl_GradientBackground( float top_r, float top_g, float top_b, float top_a,
+                                        float bot_r, float bot_g, float bot_b, float bot_a );
+    static bool fadeSubroutine(double amountTime, vec3 color);
+    static bool waitSubroutine(double amountTime);
+    static bool soundSubroutine(string filename, bool repeat);
+    static bool cameraSubroutine(double amountTime, vector<vec3> curveVertices);
+    static void handleBezierCurves(BezierCurve* curve, vector<vec3>* vertices);
 };
 
 #endif

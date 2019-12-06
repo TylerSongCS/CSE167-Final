@@ -35,6 +35,7 @@ public:
     /*  Model Data */
     vector<Texture> textures_loaded;    // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
     vector<Mesh> meshes;
+    vector<string> textureFiles;
     string directory;
     bool gammaCorrection;
 
@@ -42,6 +43,46 @@ public:
     // constructor, expects a filepath to a 3D model.
     Model(string const &path, bool gamma = false) : gammaCorrection(gamma)
     {
+        //3
+        textureFiles.push_back("glass_dif.png");
+        textureFiles.push_back("glass_ddn.png");
+        textureFiles.push_back("glass_refl.png");
+        
+        //6
+        textureFiles.push_back("leg_dif.png");
+        textureFiles.push_back("leg_showroom_spec.png");
+        textureFiles.push_back("leg_showroom_ddn.png");
+        textureFiles.push_back("leg_showroom_refl.png");
+        
+        //4
+        textureFiles.push_back("hand_dif.png");
+        textureFiles.push_back("hand_showroom_spec.png");
+        textureFiles.push_back("hand_showroom_ddn.png");
+        textureFiles.push_back("hand_showroom_refl.png");
+        
+        //3
+        textureFiles.push_back("glass_dif.png");
+        textureFiles.push_back("glass_ddn.png");
+        textureFiles.push_back("glass_refl.png");
+        
+        //1
+        textureFiles.push_back("arm_dif.png");
+        textureFiles.push_back("arm_showroom_spec.png");
+        textureFiles.push_back("arm_showroom_ddn.png");
+        textureFiles.push_back("arm_showroom_refl.png");
+        
+        //5
+        textureFiles.push_back("helmet_diff.png");
+        textureFiles.push_back("helmet_showroom_spec.png");
+        textureFiles.push_back("helmet_showroom_ddn.png");
+        textureFiles.push_back("helmet_showroom_refl.png");
+        
+        //2
+        textureFiles.push_back("body_dif.png");
+        textureFiles.push_back("body_showroom_spec.png");
+        textureFiles.push_back("body_showroom_ddn.png");
+        textureFiles.push_back("body_showroom_refl.png");
+        
         loadModel(path);
     }
 
@@ -66,6 +107,7 @@ private:
             cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
             return;
         }
+
         // retrieve the directory path of the filepath
         directory = path.substr(0, path.find_last_of('/'));
 
@@ -98,7 +140,7 @@ private:
         vector<Vertex> vertices;
         vector<unsigned int> indices;
         vector<Texture> textures;
-
+    
         // Walk through each of the mesh's vertices
         for(unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
@@ -148,12 +190,24 @@ private:
         }
         // process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        Material mat;
+        aiColor3D color;
+        
+        material->Get(AI_MATKEY_COLOR_AMBIENT, color);
+        mat.Ka = glm::vec4(color.r, color.g, color.b, 1.0);
+        material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+        mat.Kd = glm::vec4(color.r, color.g, color.b, 1.0);
+        material->Get(AI_MATKEY_COLOR_SPECULAR, color);
+        mat.Ks = glm::vec4(color.r, color.g, color.b, 1.0);
+        
+        std::cerr << mat.Kd.x << mat.Kd.y << mat.Kd.z << std::endl;
         // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
         // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
         // Same applies to other texture as the following list summarizes:
         // diffuse: texture_diffuseN
         // specular: texture_specularN
         // normal: texture_normalN
+        
 
         // 1. diffuse maps
         vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
@@ -169,7 +223,7 @@ private:
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
         
         // return a mesh object created from the extracted mesh data
-        return Mesh(vertices, indices, textures);
+        return Mesh(vertices, indices, textures, mat);
     }
 
     // checks all material textures of a given type and loads the textures if they're not loaded yet.
@@ -177,12 +231,14 @@ private:
     vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
     {
         vector<Texture> textures;
+        //std::cerr << "num of Textures: " << mat->GetTextureCount(type) << std::endl;
         for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
         {
             aiString str;
             mat->GetTexture(type, i, &str);
+            std::cerr << "file: " << str.C_Str() << "/"<< std::endl;
             // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-            bool skip = false;
+            /*bool skip = false;
             for(unsigned int j = 0; j < textures_loaded.size(); j++)
             {
                 if(std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
@@ -193,14 +249,26 @@ private:
                 }
             }
             if(!skip)
-            {   // if texture hasn't been loaded already, load it
+            {   // if texture hasn't been loaded already, load it*/
+            string textureFile;
+            if(type == aiTextureType_DIFFUSE){
+                textureFile = "Lamborginhi Aventador_diffuse.jpeg";
+            }else if(type == aiTextureType_SPECULAR){
+                textureFile = "Lamborginhi Aventador_spec.jpeg";
+            }else{
+                textureFile = "Lamborginhi Aventador_gloss.jpeg";
+            }
+            textureFile = "GtaRE1.jpg";
+            //string textureFile = textureFiles.front();
+            
                 Texture texture;
-                texture.id = TextureFromFile(str.C_Str(), this->directory);
+                texture.id = TextureFromFile(textureFile.c_str() /*str.C_Str()*/, this->directory);
                 texture.type = typeName;
-                texture.path = str.C_Str();
+                texture.path = textureFile.c_str();  /*str.C_Str();*/
                 textures.push_back(texture);
                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-            }
+            //}
+            //textureFiles.erase(textureFiles.begin());
         }
         return textures;
     }
@@ -210,9 +278,9 @@ private:
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma)
 {
     string filename = string(path);
-    
     filename = directory + '/' + filename;
-    filename = "nanosuit/glass_dif.png";
+    std::cerr << filename << std::endl;
+    //filename = "Lamborginhi Aventador OBJ/Lamborginhi Aventador_diffuse.jpeg";
     unsigned int textureID;
     glGenTextures(1, &textureID);
 

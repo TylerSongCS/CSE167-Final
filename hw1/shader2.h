@@ -10,7 +10,6 @@
 #define shader2_h
 
 #include <glm/glm.hpp>
-#include <stb_image.h>
 
 #include <string>
 #include <fstream>

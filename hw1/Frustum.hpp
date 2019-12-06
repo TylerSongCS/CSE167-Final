@@ -60,6 +60,7 @@ public:
     void CalculateFrustum(mat4 &view_matrix, mat4 &proj_matrix);
     void normalizePlane(vec4 &frustum_plane);
     bool SphereInFrustum(vec3 &pos, float &radius);
+    vec4* getFustumPlanes();
 protected:
     float fovy, aspect, znear, zfar;
     mat4 projection;

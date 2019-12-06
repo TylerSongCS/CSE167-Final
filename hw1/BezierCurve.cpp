@@ -112,81 +112,19 @@ vector<vec3> BezierCurve::getCurveVertices(){
 
 void BezierCurve::setUpEverything(vector<vec3> temp){
     
-    temp[3] = (temp[4] + temp[2]) * (0.5f);
-    temp[6] = (temp[7] + temp[5]) * (0.5f);
-    temp[9] = (temp[10] + temp[8]) * (0.5f);
-    temp[12] = (temp[13] + temp[11]) * (0.5f);
-    temp[15] = (temp[16] + temp[14]) * (0.5f);
-    temp[18] = (temp[19] + temp[17]) * (0.5f);
-    temp[21] = (temp[22] + temp[20]) * (0.5f);
-    temp[0] = (temp[1] + temp[23]) * (0.5f);
-    
-    
     vector<vec3> controlPoints1 = {temp[0], temp[1], temp[2], temp[3]};
-    vector<vec3> controlPoints2 = {temp[3], temp[4], temp[5], temp[6]};
-    vector<vec3> controlPoints3 = {temp[6], temp[7], temp[8], temp[9]};
-    vector<vec3> controlPoints4 = {temp[9], temp[10], temp[11], temp[12]};
-    vector<vec3> controlPoints5 = {temp[12], temp[13], temp[14], temp[15]};
-    vector<vec3> controlPoints6 = {temp[15], temp[16], temp[17], temp[18]};
-    vector<vec3> controlPoints7 = {temp[18], temp[19], temp[20], temp[21]};
-    vector<vec3> controlPoints8 = {temp[21], temp[22], temp[23], temp[0]};
     
     allPoints = temp;
     
     anchorPoints.clear();
     anchorPoints.push_back(0);
     anchorPoints.push_back(3);
-    anchorPoints.push_back(6);
-    anchorPoints.push_back(9);
-    anchorPoints.push_back(12);
-    anchorPoints.push_back(15);
-    anchorPoints.push_back(18);
-    anchorPoints.push_back(21);
     
     ctrlPoints.clear();
     ctrlPoints.push_back(1);
     ctrlPoints.push_back(2);
-    ctrlPoints.push_back(4);
-    ctrlPoints.push_back(5);
-    ctrlPoints.push_back(7);
-    ctrlPoints.push_back(8);
-    ctrlPoints.push_back(10);
-    ctrlPoints.push_back(11);
-    ctrlPoints.push_back(13);
-    ctrlPoints.push_back(14);
-    ctrlPoints.push_back(16);
-    ctrlPoints.push_back(17);
-    ctrlPoints.push_back(19);
-    ctrlPoints.push_back(20);
-    ctrlPoints.push_back(22);
-    ctrlPoints.push_back(23);
-
-    handlePoints.clear();
-    handlePoints.push_back(temp[2]);
-    handlePoints.push_back(temp[4]);
-    handlePoints.push_back(temp[5]);
-    handlePoints.push_back(temp[7]);
-    handlePoints.push_back(temp[8]);
-    handlePoints.push_back(temp[10]);
-    handlePoints.push_back(temp[11]);
-    handlePoints.push_back(temp[13]);
-    handlePoints.push_back(temp[14]);
-    handlePoints.push_back(temp[16]);
-    handlePoints.push_back(temp[17]);
-    handlePoints.push_back(temp[19]);
-    handlePoints.push_back(temp[20]);
-    handlePoints.push_back(temp[22]);
-    handlePoints.push_back(temp[23]);
-    handlePoints.push_back(temp[1]);
     
     curveVertices.clear();
     generateVertices(controlPoints1);
-    generateVertices(controlPoints2);
-    generateVertices(controlPoints3);
-    generateVertices(controlPoints4);
-    generateVertices(controlPoints5);
-    generateVertices(controlPoints6);
-    generateVertices(controlPoints7);
-    generateVertices(controlPoints8);
     
 }
