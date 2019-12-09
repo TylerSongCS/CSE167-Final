@@ -27,9 +27,9 @@
 #include "ControlPoint.hpp"
 #include "HandleBar.hpp"
 #include "shader2.h"
+#include "particle_generator.hpp"
 
-class Window
-{
+class Window {
 public:
     struct Material {
         glm::vec3 ambient;

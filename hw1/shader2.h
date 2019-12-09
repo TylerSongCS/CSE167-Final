@@ -10,7 +10,11 @@
 #define shader2_h
 
 #include <glm/glm.hpp>
-
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
+#include <GL/glew.h>
+#endif
 #include <string>
 #include <fstream>
 #include <sstream>

@@ -7,6 +7,7 @@
 #include <irrKlang.h>
 using namespace irrklang;
 using namespace std;
+
 ISoundEngine *SoundEngine;
 float alpha = 0.0f;
 int animationIndex = 0;
@@ -67,6 +68,7 @@ BezierCurve* curve;
 BezierCurve* curve2;
 BezierCurve* curve3;
 BezierCurve* curve4;
+BezierCurve* curve5;
 
 //initial control point values
 vec3 temp1 = vec3(0,0,10);
@@ -89,12 +91,19 @@ vec3 temp14 = vec3(2,0.5,-0.33);
 vec3 temp15 = vec3(2,0.5,0.33);
 vec3 temp16 = vec3(2,0.5,1);
 
+vec3 temp17 = vec3(0,2,1);
+vec3 temp18 = vec3(0,2,0.33);
+vec3 temp19 = vec3(0,3,-0.33);
+vec3 temp20 = vec3(0,2,-1);
+
+
 vector<vec3> allControlPoints;
 
 vector<vec3> curveVertices;
 vector<vec3> curveVertices2;
 vector<vec3> curveVertices3;
 vector<vec3> curveVertices4;
+vector<vec3> curveVertices5;
 
 vec3 lastLocation;
 int curveIndex = 0;
@@ -134,6 +143,8 @@ Shader* ourShader;
 
 Model* ourModel;
 
+Shader* particleShader;
+ParticleGenerator *Particles;
 
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
@@ -190,6 +201,11 @@ bool Window::initializeProgram() {
 
 bool Window::initializeObjects()
 {
+    
+    particleShader = new Shader("shaders/particle.vs", "shaders/particle.fs");
+    
+    Particles = new ParticleGenerator(*particleShader, (GLuint) 500);
+    
     lastLocation = eye;
     
     animationBools[0] = true;
@@ -245,7 +261,14 @@ bool Window::initializeObjects()
     
     handleBezierCurves(curve4, &curveVertices4);
     
+    allControlPoints.clear();
+    allControlPoints.push_back(temp17);
+    allControlPoints.push_back(temp18);
+    allControlPoints.push_back(temp19);
+    allControlPoints.push_back(temp20);
     
+    handleBezierCurves(curve5, &curveVertices5);
+
 	return true;
 }
 
@@ -339,7 +362,7 @@ void Window::idleCallback()
 {
 	// Perform any updates as necessary.
     
-
+    Particles->Update(0.01);
 }
 
 void Window::displayCallback(GLFWwindow* window)
@@ -359,15 +382,14 @@ void Window::displayCallback(GLFWwindow* window)
     glUniform3fv(lightLoc, 1, glm::value_ptr(light_pos));
     glUniform3fv(eyeLoc, 1, glm::value_ptr(eye));
     glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
-
-
+    
 
     currentTime = glfwGetTime();
     if(lastTime == -1){
         lastTime = currentTime;
     }
     deltaTime = currentTime - lastTime;
-    
+
     if(animationBools[0]){
         animationBools[0] = soundSubroutine("immortal.wav", false);
         animationBools[1] = !animationBools[0];
@@ -394,26 +416,38 @@ void Window::displayCallback(GLFWwindow* window)
         animationBools[6] = fadeSubroutine(2.8, vec3(0,0,0));
         animationBools[7] = !animationBools[6];
     }else if(animationBools[7]){
-        animationBools[7] = cameraSubroutine(3.0, curveVertices);
+        animationBools[7] = cameraSubroutine(1.0, curveVertices); //timed
         animationBools[8] = !animationBools[7];
     }else if(animationBools[8]){
-        animationBools[8] = fadeSubroutine(2.8, vec3(0,0,0));
+        animationBools[8] = fadeSubroutine(1.0, vec3(0,0,0));
         animationBools[9] = !animationBools[8];
     }else if(animationBools[9]){
-        animationBools[9] = cameraSubroutine(3.0, curveVertices2);
+        animationBools[9] = cameraSubroutine(1.0, curveVertices2);
         animationBools[10] = !animationBools[9];
     }else if(animationBools[10]){
-        animationBools[10] = fadeSubroutine(2.8, vec3(0,0,0));
+        animationBools[10] = fadeSubroutine(1.0, vec3(0,0,0));
         animationBools[11] = !animationBools[10];
     }else if(animationBools[11]){
-        animationBools[11] = cameraSubroutine(3.0, curveVertices3);
+        animationBools[11] = cameraSubroutine(1.0, curveVertices3);
         animationBools[12] = !animationBools[11];
     }else if(animationBools[12]){
-        animationBools[12] = fadeSubroutine(2.8, vec3(0,0,0));
+        animationBools[12] = fadeSubroutine(1.0, vec3(0,0,0));
         animationBools[13] = !animationBools[12];
     }else if(animationBools[13]){
-        animationBools[13] = cameraSubroutine(3.0, curveVertices4);
+        animationBools[13] = cameraSubroutine(1.0, curveVertices4);
         animationBools[14] = !animationBools[13];
+    }else if(animationBools[14]){
+        animationBools[14] = fadeSubroutine(1.0, vec3(0,0,0));
+        animationBools[15] = !animationBools[14];
+    }else if(animationBools[15]){
+        animationBools[15] = cameraSubroutine(1.0, curveVertices5);
+        animationBools[16] = !animationBools[15];
+    }else if(animationBools[16]){
+        eye = vec3(0,0.4,-2.4);
+        center = vec3(eye.x, eye.y, eye.z + 3);
+        view = glm::lookAt(Window::eye, Window::center, Window::up);
+        animationBools[16] = false;
+        animationBools[17] = !animationBools[16];
     }
 	// Render the object.
     world->draw(mat4(1.0f));
@@ -461,6 +495,12 @@ void Window::displayCallback(GLFWwindow* window)
     ourModel->Draw(*ourShader);
     
     mygl_GradientBackground( gradientColor1.x,gradientColor1.y , gradientColor1.z, alpha, gradientColor1.x, gradientColor1.y, gradientColor1.z, alpha );
+    
+    /*particleShader->use();
+    particleShader->setInt("sprite", 0);
+    particleShader->setMat4("projection", projection);
+    Particles->Draw();*/
+    Particles->Draw();
     
 	glfwSwapBuffers(window);
 }
