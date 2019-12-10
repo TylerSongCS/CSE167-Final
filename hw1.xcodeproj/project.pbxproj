@@ -215,6 +215,8 @@
 		2FE6AE3F239F186A008FE443 /* snow.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = snow.jpg; sourceTree = "<group>"; };
 		2FE6AE40239F186A008FE443 /* grass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = grass.jpg; sourceTree = "<group>"; };
 		2FE6AE41239F186B008FE443 /* sand.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sand.jpg; sourceTree = "<group>"; };
+		2FE6AE42239F56F7008FE443 /* trafficLight.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = trafficLight.vert; sourceTree = "<group>"; };
+		2FE6AE43239F5769008FE443 /* trafficLight.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = trafficLight.frag; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -365,6 +367,8 @@
 				2FB862322377B73A00DF05A1 /* bezierHandle.frag */,
 				2FE6AE00239B2098008FE443 /* particle.vs */,
 				2FE6AE01239B20BC008FE443 /* particle.fs */,
+				2FE6AE42239F56F7008FE443 /* trafficLight.vert */,
+				2FE6AE43239F5769008FE443 /* trafficLight.frag */,
 			);
 			path = shaders;
 			sourceTree = "<group>";

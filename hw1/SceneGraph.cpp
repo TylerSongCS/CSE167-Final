@@ -177,7 +177,9 @@ Geometry::~Geometry(){
 }
 
 void Geometry::draw(mat4 C){
-    
+    if(!shouldRender){
+        return;
+    }
     glUseProgram(shaderProgram);
     modelToWorld = C;
     cameraPosLoc = glGetUniformLocation(shaderProgram, "cameraPos");
@@ -192,6 +194,7 @@ void Geometry::draw(mat4 C){
     diffuseStrengthLoc = glGetUniformLocation(shaderProgram, "diffuseStrength");
     specularStrengthLoc = glGetUniformLocation(shaderProgram, "specularStrength");
     isPhongLoc = glGetUniformLocation(shaderProgram, "isPhong");
+    colorLoc = glGetUniformLocation(shaderProgram, "color");
     
     glUniform3fv(cameraPosLoc, 1, glm::value_ptr(Window::eye));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(Window::projection));
@@ -201,6 +204,7 @@ void Geometry::draw(mat4 C){
     glUniform3fv(ambLoc, 1, glm::value_ptr(ambient));
     glUniform3fv(diffLoc, 1, glm::value_ptr(diffuse));
     glUniform3fv(specLoc, 1, glm::value_ptr(specular));
+    glUniform3fv(colorLoc, 1, glm::value_ptr(color));
     
     glUniform1f(shinLoc, shininess);
     glUniform1f(ambientStrengthLoc, ambientStrength);
@@ -259,4 +263,6 @@ void Geometry::setRenderMode(float renderMode){
 void Geometry::setIsBoundingSpere(bool b){
     isBoundingSphere = b;
 }
-
+void Geometry::setColor(vec3 rgb){
+    color = rgb;
+}

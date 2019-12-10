@@ -75,7 +75,9 @@ public:
                      float shininess );
     void setRenderMode(float isPhong);
     void setIsBoundingSpere(bool b);
+    void setColor(vec3 rgb);
     unsigned int cubemapTexture = 0;
+    bool shouldRender = true;
 protected:
     mat4 modelToWorld;
     vector<vec3> vertices;
@@ -84,6 +86,7 @@ protected:
     GLuint vao, vbo, colorbuffer, normalbuffer;
     GLuint projectionLoc, viewLoc, modelLoc, colorLoc, lightLoc, eyeLoc, ambLoc, diffLoc, specLoc, shinLoc, ambientStrengthLoc, diffuseStrengthLoc, specularStrengthLoc, isPhongLoc, cameraPosLoc;
     GLuint shaderProgram;
+    vec3 color;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;

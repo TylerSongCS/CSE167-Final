@@ -146,7 +146,7 @@ GLuint Window::lightColorLoc; // location of the lightColor in shader
 Shader* ourShader;
 Model* ourModel;
 vec3 carPosition;
-vec3 speedVector = vec3(0,0,0.1);
+vec3 speedVector = vec3(0,0,1);
 float currentSpeed = 0.2;
 int speedIndex = 0;
 bool leftPress = false;
@@ -167,6 +167,12 @@ GLuint terrainShader;
 float camera_turn = 0;
 float theta_angle = 0;
 
+//traffic light
+Geometry* trafficLight;
+Transform* trafficLightTransform;
+GLuint trafficShader;
+vec3 trafficLightColor;
+bool trafficRender = false;
 
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
@@ -176,6 +182,7 @@ bool Window::initializeProgram() {
     bezierCurveShader = LoadShaders("shaders/bezierCurve.vert", "shaders/bezierCurve.frag");
     bezierHandleShader = LoadShaders("shaders/bezierHandle.vert","shaders/bezierHandle.frag");
     terrainShader = LoadShaders("shaders/terrain.vert", "shaders/terrain.frag");
+    trafficShader = LoadShaders("shaders/trafficLight.vert", "shaders/trafficLight.frag");
 	// Check the shader program.
 	if (!program)
 	{
@@ -224,6 +231,14 @@ bool Window::initializeProgram() {
 
 bool Window::initializeObjects()
 {
+    trafficLight = new Geometry("sphere.obj", trafficShader);
+    trafficLightTransform = new Transform(mat4(1.0f));
+    trafficLightTransform->addNode(trafficLight);
+    trafficLightTransform->scale(vec3(0.3,0.3,0.3));
+    trafficLightTransform->translate(vec3(-4,8,3));
+    trafficLight->shouldRender = false;
+    
+    
     terrain = new Terrain();
     textureIDs.push_back(TextureFromFile("resources/textures/sand.jpg", "."));
     textureIDs.push_back(TextureFromFile("resources/textures/grass.jpg", "."));
@@ -256,6 +271,7 @@ bool Window::initializeObjects()
     skybox->setCubemap(cubemapTexture);
     
     world->addNode(skybox);
+    world->addNode(trafficLightTransform);
     
     allControlPoints.clear();
     allControlPoints.push_back(temp1);
@@ -520,20 +536,77 @@ void Window::displayCallback(GLFWwindow* window)
         animationBools[28] = waitSubroutine(0.5);
         animationBools[29] = !animationBools[28];
     }else if(animationBools[29]){
-        /*speedIndex++;
-        if(speedIndex % 50 == 0){
-            currentSpeed++;
-        }*/
-        carPosition = carPosition + (speedVector * currentSpeed);
-        eye = vec3(carPosition.x, carPosition.y + 3, carPosition.z- 5);
+
+        boost = true;
+        animationBools[29] = waitSubroutine(0.5);
+        animationBools[30] = !animationBools[29];
+    }else if(animationBools[30]){
+        boost = false;
+        animationBools[30] = waitSubroutine(0.5);
+        animationBools[31] = !animationBools[30];
+    }else if(animationBools[31]){
+        animationBools[31] = fadeSubroutine(1.0, vec3(0,0,0));
+        animationBools[32] = !animationBools[31];
+    }else if(animationBools[32]){
+        eye = vec3(carPosition.x, carPosition.y + 3, carPosition.z - 5);
         center = carPosition;
         view = glm::lookAt(Window::eye, Window::center, Window::up);
+        animationBools[32] = false;
+        animationBools[33] = !animationBools[32];
+    }else if(animationBools[33]){
+        trafficLight->shouldRender = true;
         fade = false;
-
-        //animationBools[29] = waitSubroutine(0.5);
-        //animationBools[30] = !animationBools[29];
+        animationBools[33] = soundSubroutine("raceStart.wav", GL_FALSE);
+        animationBools[34] = !animationBools[33];
+    }else if(animationBools[34]){
+        trafficLight->setColor(vec3(1,0,0));
+        animationBools[34] = waitSubroutine(0.75);
+        animationBools[35] = !animationBools[34];
+    }else if(animationBools[35]){
+        trafficLight->setColor(vec3(0,0,0));
+        animationBools[35] = waitSubroutine(0.4);
+        animationBools[36] = !animationBools[35];
+    }else if(animationBools[36]){
+        trafficLight->setColor(vec3(1,0,0));
+        animationBools[36] = waitSubroutine(0.75);
+        animationBools[37] = !animationBools[36];
+    }else if(animationBools[37]){
+        trafficLight->setColor(vec3(0,0,0));
+        animationBools[37] = waitSubroutine(0.4);
+        animationBools[38] = !animationBools[37];
+    }else if(animationBools[38]){
+        trafficLight->setColor(vec3(1,0,0));
+        animationBools[38] = waitSubroutine(0.75);
+        animationBools[39] = !animationBools[38];
+    }else if(animationBools[39]){
+        trafficLight->setColor(vec3(0,0,0));
+        animationBools[39] = waitSubroutine(0.4);
+        animationBools[40] = !animationBools[39];
+    }else if(animationBools[40]){
+        trafficLight->setColor(vec3(0,1,0));
+        animationBools[40] = waitSubroutine(0.75);
+        animationBools[41] = !animationBools[40];
+    }else if(animationBools[41]){
+        trafficLight->setColor(vec3(0,0,0));
+        animationBools[41] = waitSubroutine(0.4);
+        animationBools[42] = !animationBools[41];
+    }else if(animationBools[42]){
+        trafficLight->shouldRender = false;
+        SoundEngine->stopAllSounds();
+        animationBools[42] = false;
+        animationBools[43] = !animationBools[42];
+    }else if(animationBools[43]){
+        animationBools[43] = soundSubroutine("lalala.wav", GL_TRUE);
+        animationBools[44] = !animationBools[43];
+    }else if(animationBools[44]){
+        animationBools[44] = soundSubroutine("burnout.wav", GL_FALSE);
+        animationBools[45] = !animationBools[44];
+    }else if(animationBools[45]){
+        carPosition = carPosition + (speedVector * currentSpeed);
+        eye = vec3(carPosition.x, carPosition.y + 3, carPosition.z - 5);
+        center = carPosition;
+        view = glm::lookAt(Window::eye, Window::center, Window::up);
     }
-    
 
 
 	// Render the object.
@@ -719,30 +792,6 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
                 break;
             case GLFW_KEY_C:{
                 SoundEngine->play2D("dixie-horn.wav", GL_FALSE);
-                break;
-            }
-            case GLFW_KEY_W:{
-                view = glm::translate(view, vec3(0,0,1));
-                break;
-            }
-            case GLFW_KEY_S:{
-                view = glm::translate(view, vec3(0,0,-1));
-                break;
-            }
-            case GLFW_KEY_A:{
-                view = glm::translate(view, vec3(-1,0,0));
-                break;
-            }
-            case GLFW_KEY_D:{
-                view = glm::translate(view, vec3(1,0,0));
-                break;
-            }
-            case GLFW_KEY_Z:{
-                view = glm::translate(view, vec3(0,1,0));
-                break;
-            }
-            case GLFW_KEY_X:{
-                view = glm::translate(view, vec3(0,-1,0));
                 break;
             }
             default:
