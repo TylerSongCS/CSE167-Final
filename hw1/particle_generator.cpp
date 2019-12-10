@@ -88,7 +88,8 @@ void ParticleGenerator::handleColors(){
     }else if(random == 2){
         color = vec4(1,0.2,0.43,1);
     }else if(random == 3){
-        color = vec4(1,0.74,0.41,1);
+        //color = vec4(1,0.74,0.41,1);
+        color = vec4(0,0,0,1);
     }else{
         color = vec4(0,0,0,1);
     }

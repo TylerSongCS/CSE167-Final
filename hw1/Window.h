@@ -28,6 +28,7 @@
 #include "HandleBar.hpp"
 #include "shader2.h"
 #include "particle_generator.hpp"
+#include "terrain.hpp"
 
 class Window {
 public:
@@ -83,6 +84,7 @@ public:
     static bool soundSubroutine(string filename, bool repeat);
     static bool cameraSubroutine(double amountTime, vector<vec3> curveVertices);
     static void handleBezierCurves(BezierCurve* curve, vector<vec3>* vertices);
+    static void steer();
 };
 
 #endif

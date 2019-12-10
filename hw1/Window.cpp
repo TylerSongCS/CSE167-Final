@@ -121,6 +121,9 @@ double fov = 60.0;
 glm::vec3 Window::eye(5, 5, 5); // Camera position.
 glm::vec3 Window::center(0, 0, 0); // The point we are looking at.
 glm::vec3 Window::up(0, 1, 0); // The up direction of the camera.
+//glm::vec3 Window::eye(0, 0, 50); // Camera position.
+//glm::vec3 Window::center(0, 0, 0); // The point we are looking at.
+//glm::vec3 Window::up(0, 1, 0); // The up direction of the camera.
 
 // View matrix, defined by eye, center and up.
 glm::mat4 Window::view = glm::lookAt(Window::eye, Window::center, Window::up);
@@ -139,12 +142,31 @@ GLuint Window::lightLoc; // Location of light in shader.
 GLuint Window::eyeLoc; // Location of cameraPos in shader.
 GLuint Window::lightColorLoc; // location of the lightColor in shader
 
+//car model
 Shader* ourShader;
-
 Model* ourModel;
+vec3 carPosition;
+vec3 speedVector = vec3(0,0,0.1);
+float currentSpeed = 0.2;
+int speedIndex = 0;
+bool leftPress = false;
+bool rightPress = false;
 
+//particle systems
 Shader* particleShader;
 ParticleGenerator *Particles;
+bool boost = false;
+
+//terrain
+vector<unsigned int> textureIDs;
+Terrain * terrain;
+bool fade = true;
+GLuint terrainShader;
+
+//camera
+float camera_turn = 0;
+float theta_angle = 0;
+
 
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
@@ -153,6 +175,7 @@ bool Window::initializeProgram() {
     cubemapShader = LoadShaders("shaders/cubemap.vert", "shaders/cubemap.frag");
     bezierCurveShader = LoadShaders("shaders/bezierCurve.vert", "shaders/bezierCurve.frag");
     bezierHandleShader = LoadShaders("shaders/bezierHandle.vert","shaders/bezierHandle.frag");
+    terrainShader = LoadShaders("shaders/terrain.vert", "shaders/terrain.frag");
 	// Check the shader program.
 	if (!program)
 	{
@@ -201,6 +224,11 @@ bool Window::initializeProgram() {
 
 bool Window::initializeObjects()
 {
+    terrain = new Terrain();
+    textureIDs.push_back(TextureFromFile("resources/textures/sand.jpg", "."));
+    textureIDs.push_back(TextureFromFile("resources/textures/grass.jpg", "."));
+    textureIDs.push_back(TextureFromFile("resources/textures/snow.jpg", "."));
+    textureIDs.push_back(TextureFromFile("resources/textures/grass_rock.jpg", "."));
     
     particleShader = new Shader("shaders/particle.vs", "shaders/particle.fs");
     
@@ -268,6 +296,7 @@ bool Window::initializeObjects()
     allControlPoints.push_back(temp20);
     
     handleBezierCurves(curve5, &curveVertices5);
+
 
 	return true;
 }
@@ -355,7 +384,7 @@ void Window::resizeCallback(GLFWwindow* window, int width, int height)
 
 	// Set the projection matrix.
 	Window::projection = glm::perspective(glm::radians(fov),
-                            double(width) / (double)height, 1.0, 100.0);
+                            double(width) / (double)height, 1.0, 1500.0);
 }
 
 void Window::idleCallback()
@@ -371,10 +400,10 @@ void Window::displayCallback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 
     //Set the projection matrix.
-    Window::projection = glm::perspective(glm::radians(frust->getFOVY()),
-    frust->getAspect(), frust->getZNear(), frust->getZFar());
+    Window::projection = glm::perspective(glm::radians(fov),
+    double(width) / (double)height, 1.0, 1500.0);
     
-    frust->CalculateFrustum(view, projection);
+    //frust->CalculateFrustum(view, projection);
     
 
 	// Specify the values of the uniform variables we are going to use.
@@ -384,6 +413,7 @@ void Window::displayCallback(GLFWwindow* window)
     glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
     
 
+    steer();
     currentTime = glfwGetTime();
     if(lastTime == -1){
         lastTime = currentTime;
@@ -443,12 +473,69 @@ void Window::displayCallback(GLFWwindow* window)
         animationBools[15] = cameraSubroutine(1.0, curveVertices5);
         animationBools[16] = !animationBools[15];
     }else if(animationBools[16]){
-        eye = vec3(0,0.4,-2.4);
-        center = vec3(eye.x, eye.y, eye.z + 3);
-        view = glm::lookAt(Window::eye, Window::center, Window::up);
-        animationBools[16] = false;
+        animationBools[16] = fadeSubroutine(1.0, vec3(0,0,0));
         animationBools[17] = !animationBools[16];
+    }else if(animationBools[17]){
+        eye = vec3(1,0.4,-2);
+        center = vec3(0,0,0);
+        view = glm::lookAt(Window::eye, Window::center, Window::up);
+        animationBools[17] = false;
+        animationBools[18] = !animationBools[16];
+    }else if(animationBools[18]){
+        animationBools[18] = fadeSubroutine(0.2, vec3(1,1,0));
+        animationBools[19] = !animationBools[18];
+    }else if(animationBools[19]){
+        animationBools[19] = waitSubroutine(0.1);
+        animationBools[20] = !animationBools[19];
+    }else if(animationBools[20]){
+        animationBools[20] = fadeSubroutine(0.2, vec3(1,1,0));
+        animationBools[21] = !animationBools[20];
+    }else if(animationBools[21]){
+        animationBools[21] = waitSubroutine(0.1);
+        animationBools[22] = !animationBools[21];
+    }else if(animationBools[22]){
+        animationBools[22] = fadeSubroutine(0.2, vec3(1,1,0));
+        animationBools[23] = !animationBools[22];
+    }else if(animationBools[23]){
+        animationBools[23] = waitSubroutine(0.1);
+        animationBools[24] = !animationBools[23];
+    }else if(animationBools[24]){
+        boost = true;
+        animationBools[24] = soundSubroutine("revving.wav", GL_FALSE);
+        animationBools[25] = !animationBools[24];
+    }else if(animationBools[25]){
+        animationBools[25] = waitSubroutine(0.5);
+        animationBools[26] = !animationBools[25];
+    }else if(animationBools[26]){
+        boost = false;
+        animationBools[26] = waitSubroutine(0.25);
+        animationBools[27] = !animationBools[26];
+    }else if(animationBools[27]){
+        boost = true;
+        animationBools[27] = waitSubroutine(0.5);
+        animationBools[28] = !animationBools[27];
+    }else if(animationBools[28]){
+        boost = false;
+        
+        animationBools[28] = waitSubroutine(0.5);
+        animationBools[29] = !animationBools[28];
+    }else if(animationBools[29]){
+        /*speedIndex++;
+        if(speedIndex % 50 == 0){
+            currentSpeed++;
+        }*/
+        carPosition = carPosition + (speedVector * currentSpeed);
+        eye = vec3(carPosition.x, carPosition.y + 3, carPosition.z- 5);
+        center = carPosition;
+        view = glm::lookAt(Window::eye, Window::center, Window::up);
+        fade = false;
+
+        //animationBools[29] = waitSubroutine(0.5);
+        //animationBools[30] = !animationBools[29];
     }
+    
+
+
 	// Render the object.
     world->draw(mat4(1.0f));
     
@@ -473,7 +560,6 @@ void Window::displayCallback(GLFWwindow* window)
         }
         lastPoint = currPoint;
     }
-    
     // don't forget to enable shader before setting uniforms
     ourShader->use();
 
@@ -483,7 +569,10 @@ void Window::displayCallback(GLFWwindow* window)
 
     // render the loaded model
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+    model = glm::translate(model, carPosition); // translate it down so it's at the center of the scene
+    model = glm::rotate(model, glm::radians(((theta_angle * -1) * 50.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(theta_angle * 10.0f * camera_turn), glm::vec3(0.0f, 0.0f, 1.0f));
+    
     model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));    // it's a bit too big for our scene, so scale it down
     ourShader->setMat4("model", model);
     ourShader->setFloat("shininess", 1.0f);
@@ -492,16 +581,21 @@ void Window::displayCallback(GLFWwindow* window)
     ourShader->setFloat("shininess", 64.0f);
     ourShader->setVec3("viewPos", eye);
     ourShader->setFloat("alpha", 1.0f);
+    ourShader->setVec3("lookPos", carPosition);
     ourModel->Draw(*ourShader);
     
-    mygl_GradientBackground( gradientColor1.x,gradientColor1.y , gradientColor1.z, alpha, gradientColor1.x, gradientColor1.y, gradientColor1.z, alpha );
     
-    /*particleShader->use();
-    particleShader->setInt("sprite", 0);
-    particleShader->setMat4("projection", projection);
-    Particles->Draw();*/
-    Particles->Draw();
     
+    if(boost){
+        Particles->Draw();
+    }
+
+    if(fade){
+        mygl_GradientBackground( gradientColor1.x,gradientColor1.y , gradientColor1.z, alpha, gradientColor1.x, gradientColor1.y, gradientColor1.z, alpha );
+    }else{
+        glUseProgram(terrainShader);
+        terrain->draw(terrainShader, projection, view, textureIDs);
+    }
 	glfwSwapBuffers(window);
 }
 
@@ -655,7 +749,40 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
                 break;
 		}
 	}
+    if(key == GLFW_KEY_A && action == GLFW_PRESS){
+        leftPress = true;
+    }else if(key == GLFW_KEY_A && action == GLFW_RELEASE){
+        leftPress = false;
+    }
+    if(key == GLFW_KEY_D && action == GLFW_PRESS){
+        rightPress = true;
+    }else if(key == GLFW_KEY_D && action == GLFW_RELEASE){
+        rightPress = false;
+    }
+    
 }
+
+void Window::steer() {
+    if (leftPress && !rightPress) {
+        if (camera_turn < 10.0f) camera_turn += 0.1;
+        theta_angle -= 0.01f;
+        speedVector.z = cos(theta_angle) * 0.5;
+        speedVector.x = -sin(theta_angle) * 0.5;
+    } else if (!leftPress && !rightPress) {
+        if (camera_turn > 0.0f)
+            camera_turn -= 0.1;
+    }
+    if (rightPress && !leftPress) {
+        if (camera_turn < 10.0f) camera_turn += 0.1;
+        theta_angle += 0.01f;
+        speedVector.z = cos(theta_angle) * 0.5;
+        speedVector.x = -sin(theta_angle) * 0.5;
+    } else if (!leftPress && !rightPress) {
+        if (camera_turn > 0.0f)
+            camera_turn -= 0.1;
+    }
+}
+
 
 bool Window::fadeSubroutine(double amountTime, vec3 color){
     gradientColor1 = color;

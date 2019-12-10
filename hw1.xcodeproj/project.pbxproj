@@ -28,6 +28,8 @@
 		2FE6AE04239DB8B0008FE443 /* particle_generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE02239DB8B0008FE443 /* particle_generator.cpp */; };
 		2FE6AE13239DCA46008FE443 /* libSOIL.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FE6AE12239DCA46008FE443 /* libSOIL.dylib */; };
 		2FE6AE35239E0032008FE443 /* particle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE33239E0031008FE443 /* particle.cpp */; };
+		2FE6AE3A239F0DE7008FE443 /* perlin_noise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE38239F0DE5008FE443 /* perlin_noise.cpp */; };
+		2FE6AE3B239F0DE7008FE443 /* terrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE39239F0DE6008FE443 /* terrain.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -203,6 +205,16 @@
 		2FE6AE12239DCA46008FE443 /* libSOIL.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSOIL.dylib; path = ../../../../opt/local/lib/libSOIL.dylib; sourceTree = "<group>"; };
 		2FE6AE33239E0031008FE443 /* particle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = particle.cpp; sourceTree = "<group>"; };
 		2FE6AE34239E0031008FE443 /* particle.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = particle.hpp; sourceTree = "<group>"; };
+		2FE6AE36239F0DE5008FE443 /* perlin_noise.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = perlin_noise.hpp; sourceTree = "<group>"; };
+		2FE6AE37239F0DE5008FE443 /* terrain.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = terrain.hpp; sourceTree = "<group>"; };
+		2FE6AE38239F0DE5008FE443 /* perlin_noise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = perlin_noise.cpp; sourceTree = "<group>"; };
+		2FE6AE39239F0DE6008FE443 /* terrain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = terrain.cpp; sourceTree = "<group>"; };
+		2FE6AE3C239F0E3F008FE443 /* terrain.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = terrain.vert; sourceTree = "<group>"; };
+		2FE6AE3D239F0E3F008FE443 /* terrain.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = terrain.frag; sourceTree = "<group>"; };
+		2FE6AE3E239F186A008FE443 /* grass_rock.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = grass_rock.jpg; sourceTree = "<group>"; };
+		2FE6AE3F239F186A008FE443 /* snow.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = snow.jpg; sourceTree = "<group>"; };
+		2FE6AE40239F186A008FE443 /* grass.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = grass.jpg; sourceTree = "<group>"; };
+		2FE6AE41239F186B008FE443 /* sand.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sand.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -233,6 +245,10 @@
 		2FB8621A2373E6BD00DF05A1 /* textures */ = {
 			isa = PBXGroup;
 			children = (
+				2FE6AE3E239F186A008FE443 /* grass_rock.jpg */,
+				2FE6AE40239F186A008FE443 /* grass.jpg */,
+				2FE6AE41239F186B008FE443 /* sand.jpg */,
+				2FE6AE3F239F186A008FE443 /* snow.jpg */,
 				2FB8621B2373E6C700DF05A1 /* skybox */,
 			);
 			path = textures;
@@ -271,6 +287,10 @@
 		2FDEFD822345AAB50079E27E /* hw1 */ = {
 			isa = PBXGroup;
 			children = (
+				2FE6AE38239F0DE5008FE443 /* perlin_noise.cpp */,
+				2FE6AE36239F0DE5008FE443 /* perlin_noise.hpp */,
+				2FE6AE39239F0DE6008FE443 /* terrain.cpp */,
+				2FE6AE37239F0DE5008FE443 /* terrain.hpp */,
 				2FE6ADCF2394E2B5008FE443 /* nanosuit */,
 				2FE6AD5C23908ACF008FE443 /* stb_image.h */,
 				2FB862192373E6B100DF05A1 /* resources */,
@@ -329,6 +349,8 @@
 		2FDEFD932345AB700079E27E /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				2FE6AE3D239F0E3F008FE443 /* terrain.frag */,
+				2FE6AE3C239F0E3F008FE443 /* terrain.vert */,
 				2FE6ADEB23977F87008FE443 /* 1.model_loading.fs */,
 				2FE6ADEA23977F86008FE443 /* 1.model_loading.vs */,
 				2FDEFD942345AB700079E27E /* shader.vert */,
@@ -543,6 +565,7 @@
 				2F7749212369150C00F0D8E7 /* BoundingSphere.cpp in Sources */,
 				2FDEFD992345AB700079E27E /* shader.cpp in Sources */,
 				2F774927236945A000F0D8E7 /* Plane.cpp in Sources */,
+				2FE6AE3A239F0DE7008FE443 /* perlin_noise.cpp in Sources */,
 				2F7749192363D4B200F0D8E7 /* SceneGraph.cpp in Sources */,
 				2FDEFD962345AB700079E27E /* Cube.cpp in Sources */,
 				2FE6AE35239E0032008FE443 /* particle.cpp in Sources */,
@@ -550,6 +573,7 @@
 				2FB8622623752D3500DF05A1 /* BezierCurve.cpp in Sources */,
 				2FDC374023467205009FC368 /* PointCloud.cpp in Sources */,
 				2F7749242369452000F0D8E7 /* Frustum.cpp in Sources */,
+				2FE6AE3B239F0DE7008FE443 /* terrain.cpp in Sources */,
 				2FB8622B2375FF8600DF05A1 /* ControlPoint.cpp in Sources */,
 				2FDEFD972345AB700079E27E /* Window.cpp in Sources */,
 				2F158C8D234FE8E3007535E4 /* objparser.cpp in Sources */,

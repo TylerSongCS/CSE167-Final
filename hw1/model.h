@@ -280,7 +280,6 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
     string filename = string(path);
     filename = directory + '/' + filename;
     std::cerr << filename << std::endl;
-    //filename = "Lamborginhi Aventador OBJ/Lamborginhi Aventador_diffuse.jpeg";
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
@@ -315,5 +314,25 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
     }
 
     return textureID;
+}
+unsigned int load_texture(std::string filename) {
+    
+    unsigned int texture_num;
+    unsigned int slot = 0;
+    stbi_set_flip_vertically_on_load(true);
+    int width, height, nChannels;
+    unsigned char *data = stbi_load((filename).c_str(), &width, &height, &nChannels, 0);
+    glGenTextures(1, &texture_num);
+    glBindTexture(GL_TEXTURE_2D, texture_num);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    if (data)
+        stbi_image_free(data);
+    return texture_num;
 }
 #endif

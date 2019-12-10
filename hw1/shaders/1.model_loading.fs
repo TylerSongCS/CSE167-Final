@@ -14,7 +14,7 @@ uniform vec3 light_position_world;
 uniform float shininess;
 uniform float alpha;
 uniform sampler2D texture_diffuse1;
-
+uniform vec3 lookPos;
 /*void main()
 {
     FragColor = texture(texture_diffuse1, TexCoords);
@@ -26,7 +26,7 @@ void main()
 {
     //ambient lighting code begin
     vec3 result;
-    vec3 lookPos = vec3(0,0,0); //assume the look position is at origin for now
+    //vec3 lookPos = vec3(0,0,0); //assume the look position is at origin for now
     float distanceToLight = sqrt(pow(lookPos.x - light_position_world.x, 2) + pow(lookPos.y - light_position_world.y, 2) + pow(lookPos.z - light_position_world.z, 2));
     float attenuationFactor = 1.0f/200.0f;
     float attenuation = 1.0 / (1.0 + attenuationFactor * pow(distanceToLight, 2));
@@ -51,6 +51,6 @@ void main()
     specular = lightColor * (spec * surfaceColor.rgb);
     //specular lighting code end
     
-    result = ambient + attenuation * (diffuse + specular);
+    result = ambient + diffuse + specular;
     FragColor = vec4(result ,alpha);
 }
