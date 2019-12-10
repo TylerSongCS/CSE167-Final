@@ -73,6 +73,7 @@ void ParticleGenerator::Draw()
     shader.setMat4("model", model);
     // Bind to the VAO.
     glBindVertexArray(vao);
+    glPointSize(2.5f);
     glDrawArrays(GL_POINTS, 0, (GLsizei) points.size());
     glBindVertexArray(0);
 }
@@ -96,4 +97,10 @@ void ParticleGenerator::handleColors(){
         
     colors.push_back(color);
 }
+void ParticleGenerator::translate(vec3 transformation){
+    model = glm::translate(model, transformation);
+}
 
+void ParticleGenerator::rotate(float degree, vec3 direction){
+    model = glm::rotate(model, glm::radians(degree), direction);
+}

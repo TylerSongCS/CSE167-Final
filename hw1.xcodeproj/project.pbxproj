@@ -30,6 +30,8 @@
 		2FE6AE35239E0032008FE443 /* particle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE33239E0031008FE443 /* particle.cpp */; };
 		2FE6AE3A239F0DE7008FE443 /* perlin_noise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE38239F0DE5008FE443 /* perlin_noise.cpp */; };
 		2FE6AE3B239F0DE7008FE443 /* terrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE39239F0DE6008FE443 /* terrain.cpp */; };
+		2FE6AE4623A0221F008FE443 /* Cloud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE4423A0221E008FE443 /* Cloud.cpp */; };
+		2FE6AE4B23A03389008FE443 /* Water.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE6AE4A23A03389008FE443 /* Water.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -217,6 +219,14 @@
 		2FE6AE41239F186B008FE443 /* sand.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sand.jpg; sourceTree = "<group>"; };
 		2FE6AE42239F56F7008FE443 /* trafficLight.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = trafficLight.vert; sourceTree = "<group>"; };
 		2FE6AE43239F5769008FE443 /* trafficLight.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = trafficLight.frag; sourceTree = "<group>"; };
+		2FE6AE4423A0221E008FE443 /* Cloud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cloud.cpp; sourceTree = "<group>"; };
+		2FE6AE4523A0221F008FE443 /* Cloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloud.h; sourceTree = "<group>"; };
+		2FE6AE4723A02266008FE443 /* cloud.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = cloud.frag; sourceTree = "<group>"; };
+		2FE6AE4823A02266008FE443 /* cloud.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = cloud.vert; sourceTree = "<group>"; };
+		2FE6AE4923A03388008FE443 /* Water.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Water.h; sourceTree = "<group>"; };
+		2FE6AE4A23A03389008FE443 /* Water.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Water.cpp; sourceTree = "<group>"; };
+		2FE6AE4C23A033B0008FE443 /* water.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = water.frag; sourceTree = "<group>"; };
+		2FE6AE4D23A033B0008FE443 /* water.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = water.vert; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -289,6 +299,10 @@
 		2FDEFD822345AAB50079E27E /* hw1 */ = {
 			isa = PBXGroup;
 			children = (
+				2FE6AE4A23A03389008FE443 /* Water.cpp */,
+				2FE6AE4923A03388008FE443 /* Water.h */,
+				2FE6AE4423A0221E008FE443 /* Cloud.cpp */,
+				2FE6AE4523A0221F008FE443 /* Cloud.h */,
 				2FE6AE38239F0DE5008FE443 /* perlin_noise.cpp */,
 				2FE6AE36239F0DE5008FE443 /* perlin_noise.hpp */,
 				2FE6AE39239F0DE6008FE443 /* terrain.cpp */,
@@ -351,6 +365,10 @@
 		2FDEFD932345AB700079E27E /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				2FE6AE4C23A033B0008FE443 /* water.frag */,
+				2FE6AE4D23A033B0008FE443 /* water.vert */,
+				2FE6AE4723A02266008FE443 /* cloud.frag */,
+				2FE6AE4823A02266008FE443 /* cloud.vert */,
 				2FE6AE3D239F0E3F008FE443 /* terrain.frag */,
 				2FE6AE3C239F0E3F008FE443 /* terrain.vert */,
 				2FE6ADEB23977F87008FE443 /* 1.model_loading.fs */,
@@ -575,6 +593,7 @@
 				2FE6AE35239E0032008FE443 /* particle.cpp in Sources */,
 				2FB862162373CBE600DF05A1 /* Skybox.cpp in Sources */,
 				2FB8622623752D3500DF05A1 /* BezierCurve.cpp in Sources */,
+				2FE6AE4B23A03389008FE443 /* Water.cpp in Sources */,
 				2FDC374023467205009FC368 /* PointCloud.cpp in Sources */,
 				2F7749242369452000F0D8E7 /* Frustum.cpp in Sources */,
 				2FE6AE3B239F0DE7008FE443 /* terrain.cpp in Sources */,
@@ -584,6 +603,7 @@
 				2FDEFD982345AB700079E27E /* main.cpp in Sources */,
 				2FE6AE04239DB8B0008FE443 /* particle_generator.cpp in Sources */,
 				2FB862302377AE7A00DF05A1 /* HandleBar.cpp in Sources */,
+				2FE6AE4623A0221F008FE443 /* Cloud.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

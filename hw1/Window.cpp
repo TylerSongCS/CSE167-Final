@@ -72,7 +72,7 @@ BezierCurve* curve5;
 
 //initial control point values
 vec3 temp1 = vec3(0,0,10);
-vec3 temp2 = vec3(0,-5,6.7);
+vec3 temp2 = vec3(0,2,6.7);
 vec3 temp3 = vec3(0,5,3.3);
 vec3 temp4 = vec3(0,1,1);
 
@@ -146,7 +146,7 @@ GLuint Window::lightColorLoc; // location of the lightColor in shader
 Shader* ourShader;
 Model* ourModel;
 vec3 carPosition;
-vec3 speedVector = vec3(0,0,1);
+vec3 speedVector = vec3(0,0,2.5);
 float currentSpeed = 0.2;
 int speedIndex = 0;
 bool leftPress = false;
@@ -174,6 +174,15 @@ GLuint trafficShader;
 vec3 trafficLightColor;
 bool trafficRender = false;
 
+//cloud
+Cloud* cloud;
+GLuint cloudShader;
+
+Water* water;
+GLuint waterShader;
+
+float Window::prevX = 0, Window::prevY = 0, Window::yaw = 90.0f, Window::pitch = 0.0f;
+
 bool Window::initializeProgram() {
 	// Create a shader program with a vertex shader and a fragment shader.
 	program = LoadShaders("shaders/shader.vert", "shaders/shader.frag");
@@ -183,6 +192,8 @@ bool Window::initializeProgram() {
     bezierHandleShader = LoadShaders("shaders/bezierHandle.vert","shaders/bezierHandle.frag");
     terrainShader = LoadShaders("shaders/terrain.vert", "shaders/terrain.frag");
     trafficShader = LoadShaders("shaders/trafficLight.vert", "shaders/trafficLight.frag");
+    cloudShader = LoadShaders("shaders/cloud.vert", "shaders/cloud.frag");
+    waterShader = LoadShaders("shaders/water.vert", "shaders/water.frag");
 	// Check the shader program.
 	if (!program)
 	{
@@ -231,6 +242,10 @@ bool Window::initializeProgram() {
 
 bool Window::initializeObjects()
 {
+    water = new Water("resources/textures/dudv_map.png", "resources/textures/normal_map.png", 5);
+    
+    cloud = new Cloud(sphereFileName);
+    
     trafficLight = new Geometry("sphere.obj", trafficShader);
     trafficLightTransform = new Transform(mat4(1.0f));
     trafficLightTransform->addNode(trafficLight);
@@ -429,7 +444,7 @@ void Window::displayCallback(GLFWwindow* window)
     glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
     
 
-    steer();
+    
     currentTime = glfwGetTime();
     if(lastTime == -1){
         lastTime = currentTime;
@@ -462,37 +477,37 @@ void Window::displayCallback(GLFWwindow* window)
         animationBools[6] = fadeSubroutine(2.8, vec3(0,0,0));
         animationBools[7] = !animationBools[6];
     }else if(animationBools[7]){
-        animationBools[7] = cameraSubroutine(1.0, curveVertices); //timed
+        animationBools[7] = cameraSubroutine(4.5, curveVertices); //timed
         animationBools[8] = !animationBools[7];
     }else if(animationBools[8]){
         animationBools[8] = fadeSubroutine(1.0, vec3(0,0,0));
         animationBools[9] = !animationBools[8];
     }else if(animationBools[9]){
-        animationBools[9] = cameraSubroutine(1.0, curveVertices2);
+        animationBools[9] = cameraSubroutine(4.5, curveVertices2);
         animationBools[10] = !animationBools[9];
     }else if(animationBools[10]){
-        animationBools[10] = fadeSubroutine(1.0, vec3(0,0,0));
+        animationBools[10] = fadeSubroutine(2.5, vec3(0,0,0));
         animationBools[11] = !animationBools[10];
     }else if(animationBools[11]){
-        animationBools[11] = cameraSubroutine(1.0, curveVertices3);
+        animationBools[11] = cameraSubroutine(4.5, curveVertices3);
         animationBools[12] = !animationBools[11];
     }else if(animationBools[12]){
-        animationBools[12] = fadeSubroutine(1.0, vec3(0,0,0));
+        animationBools[12] = fadeSubroutine(2.5, vec3(0,0,0));
         animationBools[13] = !animationBools[12];
     }else if(animationBools[13]){
-        animationBools[13] = cameraSubroutine(1.0, curveVertices4);
+        animationBools[13] = cameraSubroutine(4.5, curveVertices4);
         animationBools[14] = !animationBools[13];
     }else if(animationBools[14]){
-        animationBools[14] = fadeSubroutine(1.0, vec3(0,0,0));
+        animationBools[14] = fadeSubroutine(2.5, vec3(0,0,0));
         animationBools[15] = !animationBools[14];
     }else if(animationBools[15]){
-        animationBools[15] = cameraSubroutine(1.0, curveVertices5);
+        animationBools[15] = cameraSubroutine(4.5, curveVertices5);
         animationBools[16] = !animationBools[15];
     }else if(animationBools[16]){
-        animationBools[16] = fadeSubroutine(1.0, vec3(0,0,0));
+        animationBools[16] = fadeSubroutine(2.5, vec3(0,0,0));
         animationBools[17] = !animationBools[16];
     }else if(animationBools[17]){
-        eye = vec3(1,0.4,-2);
+        eye = vec3(1,0.4,-3);
         center = vec3(0,0,0);
         view = glm::lookAt(Window::eye, Window::center, Window::up);
         animationBools[17] = false;
@@ -609,14 +624,7 @@ void Window::displayCallback(GLFWwindow* window)
     }
 
 
-	// Render the object.
-    world->draw(mat4(1.0f));
-    
-	// Gets events, including input such as keyboard and mouse or window resizing.
-	glfwPollEvents();
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    
+
     if(is_button_down) {
         double xpos, ypos;
         int width, height;
@@ -633,6 +641,31 @@ void Window::displayCallback(GLFWwindow* window)
         }
         lastPoint = currPoint;
     }
+    water->bindRefractionFrameBuffer();
+    drawAll();
+    water->bindReflectionFrameBuffer();
+    float camDist = 2 * (eye.y - water->height);
+    eye.y -= camDist;
+    glm::vec3 oldCenter = glm::vec3(center.x, center.y, center.z);
+
+    drawAll();
+    water->unbindFrameBuffer(1400, 800);
+    eye.y += camDist;
+    center = oldCenter;
+    drawAll();
+    water->draw(waterShader, view, projection, eye);
+    //drawAll();
+    // Gets events, including input such as keyboard and mouse or window resizing.
+    glfwPollEvents();
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+	glfwSwapBuffers(window);
+}
+void Window::drawAll(){
+    view = glm::lookAt(Window::eye, Window::center, Window::up);
+    steer();
+    // Render the object.
+    world->draw(mat4(1.0f));
     // don't forget to enable shader before setting uniforms
     ourShader->use();
 
@@ -669,7 +702,11 @@ void Window::displayCallback(GLFWwindow* window)
         glUseProgram(terrainShader);
         terrain->draw(terrainShader, projection, view, textureIDs);
     }
-	glfwSwapBuffers(window);
+    glDisable(GL_CULL_FACE);
+     cloud->draw(cloudShader, glm::mat4(glm::mat3(view)), projection, 0.0001);
+     glEnable(GL_CULL_FACE);
+
+    
 }
 
 void Window::interpolate(glm::vec3 fromPos, glm::vec3 toPos, float weight){
@@ -793,6 +830,18 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
             case GLFW_KEY_C:{
                 SoundEngine->play2D("dixie-horn.wav", GL_FALSE);
                 break;
+            }case GLFW_KEY_R:{
+                terrain->regenerate();
+                break;
+            }case GLFW_KEY_X:{
+                view = glm::translate(view, vec3(0,1,0));
+                break;
+            }case GLFW_KEY_Z:{
+                view = glm::translate(view, vec3(0,-1,0));
+                break;
+            }case GLFW_KEY_V:{
+                cloud->changeRandom();
+                break;
             }
             default:
                 break;
@@ -815,8 +864,8 @@ void Window::steer() {
     if (leftPress && !rightPress) {
         if (camera_turn < 10.0f) camera_turn += 0.1;
         theta_angle -= 0.01f;
-        speedVector.z = cos(theta_angle) * 0.5;
-        speedVector.x = -sin(theta_angle) * 0.5;
+        speedVector.z = cos(theta_angle) * 2.5;
+        speedVector.x = -sin(theta_angle) * 2.5;
     } else if (!leftPress && !rightPress) {
         if (camera_turn > 0.0f)
             camera_turn -= 0.1;
@@ -824,8 +873,8 @@ void Window::steer() {
     if (rightPress && !leftPress) {
         if (camera_turn < 10.0f) camera_turn += 0.1;
         theta_angle += 0.01f;
-        speedVector.z = cos(theta_angle) * 0.5;
-        speedVector.x = -sin(theta_angle) * 0.5;
+        speedVector.z = cos(theta_angle) * 2.5;
+        speedVector.x = -sin(theta_angle) * 2.5;
     } else if (!leftPress && !rightPress) {
         if (camera_turn > 0.0f)
             camera_turn -= 0.1;
@@ -897,7 +946,7 @@ bool Window::cameraSubroutine(double amountTime, vector<vec3> vertices){
 void Window::handleBezierCurves(BezierCurve* curve, vector<vec3>* vertices){
     curve = new BezierCurve(bezierCurveShader, allControlPoints);
     
-    world->addNode(curve);
+    //world->addNode(curve);
     
     ctrlPointObjects.clear();
     for(int i = 0; i< allControlPoints.size(); i++){
@@ -910,14 +959,14 @@ void Window::handleBezierCurves(BezierCurve* curve, vector<vec3>* vertices){
     for(int i = 0; i < tempVec2.size(); i++){
         ControlPoint* ctrlPoint = new ControlPoint(tempVec1[tempVec2[i]], bezierCurveShader, true);
         ctrlPointObjects[tempVec2[i]] = ctrlPoint;
-        world->addNode(ctrlPoint);
+        //world->addNode(ctrlPoint);
     }
     
     tempVec2 = curve->getCtrlpoints();
     for(int i = 0; i < tempVec2.size(); i++){
         ControlPoint* ctrlPoint = new ControlPoint(tempVec1[tempVec2[i]], bezierCurveShader, false);
         ctrlPointObjects[tempVec2[i]] = ctrlPoint;
-        world->addNode(ctrlPoint);
+        //world->addNode(ctrlPoint);
     }
     
     *vertices = curve->getCurveVertices();
@@ -988,4 +1037,29 @@ void Window::mygl_GradientBackground( float top_r, float top_g, float top_b, flo
   glBindVertexArray(0);
 
   glEnable(GL_DEPTH_TEST);
+}
+
+void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (prevX == 600 && prevY == 400)
+    {
+        float xoffset = xpos - prevX;
+        float yoffset = prevY - ypos; // reversed since y-coordinates range from bottom to top
+        prevX = xpos;
+        prevY = ypos;
+        float sensitivity = 0.05f;
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+        yaw += xoffset;
+        pitch += yoffset;
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+        glm::vec3 front;
+        front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+        front.y = sin(glm::radians(pitch));
+        front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+        center = glm::normalize(front);
+    }
 }

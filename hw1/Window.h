@@ -29,7 +29,8 @@
 #include "shader2.h"
 #include "particle_generator.hpp"
 #include "terrain.hpp"
-
+#include "Cloud.h"
+#include "Water.h"
 class Window {
 public:
     struct Material {
@@ -45,7 +46,8 @@ public:
     static int isPhong;
     
     static glm::vec3 lightColor;
-    
+    static float prevX, prevY, yaw, pitch;
+
 
     static float interpFactor;
     
@@ -85,6 +87,8 @@ public:
     static bool cameraSubroutine(double amountTime, vector<vec3> curveVertices);
     static void handleBezierCurves(BezierCurve* curve, vector<vec3>* vertices);
     static void steer();
+    static void drawAll();
+    static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 };
 
 #endif

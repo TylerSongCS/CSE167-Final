@@ -30,13 +30,15 @@ public:
     // Render all particles
     void Draw();
     void handleColors();
+    void translate(vec3 transformation);
+    void rotate(float degree, glm::vec3 direction);
 private:
     std::vector<particle> particles;
     std::vector<glm::vec3> points;
     std::vector<glm::vec4> colors;
     GLuint amount;
     Shader shader;
-    
+    mat4 model = mat4(1.0f);
     GLuint vao, vbo, colorbuffer;
 };
 
