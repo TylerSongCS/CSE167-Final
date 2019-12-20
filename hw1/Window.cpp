@@ -698,6 +698,8 @@ void Window::drawAll(){
 
     if(fade){
         mygl_GradientBackground( gradientColor1.x,gradientColor1.y , gradientColor1.z, alpha, gradientColor1.x, gradientColor1.y, gradientColor1.z, alpha );
+
+
     }else{
         glUseProgram(terrainShader);
         terrain->draw(terrainShader, projection, view, textureIDs);
@@ -705,7 +707,6 @@ void Window::drawAll(){
     glDisable(GL_CULL_FACE);
      cloud->draw(cloudShader, glm::mat4(glm::mat3(view)), projection, 0.0001);
      glEnable(GL_CULL_FACE);
-
     
 }
 
